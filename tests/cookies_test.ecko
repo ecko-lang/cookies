@@ -1,0 +1,52 @@
+# Tests for the cookies package - offline, deterministic.
+import std.test
+import "../main.ecko"
+cookies = main
+
+test.case("parse a Set-Cookie header with attributes", || {
+    jar = cookies.parse("session=abc123; Path=/; HttpOnly; Secure; Max-Age=3600")
+    c = jar.session
+    test.eq(c.value, "abc123")
+    test.eq(c.path, "/")
+    test.eq(c.http_only, true)
+    test.eq(c.secure, true)
+    test.eq(c.max_age, 3600)
+})
+
+test.case("parse a list of Set-Cookie headers into one jar", || {
+    jar = cookies.parse(["a=1; Path=/", "b=2; Domain=example.com"])
+    test.eq(jar.a.value, "1")
+    test.eq(jar.b.value, "2")
+    test.eq(jar.b.domain, "example.com")
+})
+
+test.case("header builds a sorted Cookie request string", || {
+    jar = cookies.parse(["z=1", "a=2"])
+    test.eq(cookies.header(jar), "a=2; z=1")
+})
+
+test.case("flags default to false; a value may contain '='", || {
+    jar = cookies.parse("token=a=b=c")
+    test.eq(jar.token.value, "a=b=c")
+    test.eq(jar.token.secure, false)
+    test.eq(jar.token.http_only, false)
+})
+
+test.case("set and merge accumulate a session jar", || {
+    jar = cookies.set(empty_map(), "x", "1")
+    test.eq(cookies.header(jar), "x=1")
+    jar2 = cookies.merge(jar, "y=2; Path=/")
+    test.eq(cookies.header(jar2), "x=1; y=2")
+})
+
+test.case("SameSite and Expires are captured", || {
+    jar = cookies.parse("s=1; SameSite=Lax; Expires=Wed, 21 Oct 2025 07:28:00 GMT")
+    test.eq(jar.s.same_site, "Lax")
+    test.eq(jar.s.expires, "Wed, 21 Oct 2025 07:28:00 GMT")
+})
+
+test.case("a malformed Max-Age is ignored, not fatal", || {
+    jar = cookies.parse("k=1; Max-Age=oops")
+    test.eq(jar.k.value, "1")
+    test.eq(get(jar.k, "max_age"), null)
+})

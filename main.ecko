@@ -1,0 +1,77 @@
+# cookies - parse and serialize HTTP cookies for client sessions.
+#
+#   import cookies
+#
+#   jar = cookies.parse(response.headers.set_cookie)   # a header, or a list
+#   # { session: { value: "abc", path: "/", http_only: true, ... } }
+#
+#   cookies.header(jar)              # "a=1; b=2"  - the Cookie request header
+#   jar = cookies.merge(jar, sc)     # fold a new Set-Cookie into the session jar
+#
+# A jar is a map of cookie name -> record. A record always has `value`, plus
+# any attributes that were set: `path`, `domain`, `expires`, `max_age` (Int),
+# `same_site`, and the `secure` / `http_only` flags (default false). Pure Ecko;
+# no capabilities.
+
+fn drop_n(l, n) {
+    if n <= 0 { l } else if n >= len(l) { [] } else { reverse(take(reverse(l), len(l) - n)) }
+}
+
+# Rejoin the tail after the first "=" so a value may itself contain "=".
+fn value_after_eq(kv) = if len(kv) > 1 { join(drop_n(kv, 1), "=") } else { "" }
+
+# parse_one(set_cookie) -> [name, record]
+fn parse_one(sc) {
+    parts = split(sc, ";")
+    nv = split(trim(parts[0]), "=")
+    name = trim(nv[0])
+    mut cookie = { value: value_after_eq(nv), secure: false, http_only: false }
+    mut i = 1
+    while i < len(parts) {
+        kv = split(trim(parts[i]), "=")
+        key = lower(trim(kv[0]))
+        val = value_after_eq(kv)
+        if key == "secure" { cookie = insert(cookie, "secure", true) } else if key == "httponly" { cookie = insert(cookie, "http_only", true) } else if key == "path" { cookie = insert(cookie, "path", val) } else if key == "domain" { cookie = insert(cookie, "domain", val) } else if key == "expires" { cookie = insert(cookie, "expires", val) } else if key == "samesite" { cookie = insert(cookie, "same_site", val) } else if key == "max-age" {
+            # Tolerant: a non-numeric Max-Age is ignored, not fatal.
+            ma = try { int(val) } catch (e) { null }
+            if ma != null { cookie = insert(cookie, "max_age", ma) }
+        }
+        i = i + 1
+    }
+    [name, cookie]
+}
+
+# parse(set_cookie) -> jar. Accepts one Set-Cookie header string or a list.
+export fn parse(set_cookie) {
+    headers = if type_of(set_cookie) == "list" { set_cookie } else { [set_cookie] }
+    mut jar = empty_map()
+    for h in headers {
+        r = parse_one(h)
+        jar = insert(jar, r[0], r[1])
+    }
+    jar
+}
+
+# header(jar) -> "name=value; ..." for the Cookie request header (names sorted;
+# attributes are response-only and not sent).
+export fn header(jar) {
+    mut parts = []
+    for name in sort(keys(jar)) {
+        parts = push(parts, name + "=" + jar[name].value)
+    }
+    join(parts, "; ")
+}
+
+# set(jar, name, value) -> jar with a cookie added or replaced.
+export fn set(jar, name, value) = insert(jar, name, { value: value, secure: false, http_only: false })
+
+# merge(jar, set_cookie) -> jar with cookies from a new Set-Cookie folded in
+# (later values win) - the session-accumulation helper.
+export fn merge(jar, set_cookie) {
+    incoming = parse(set_cookie)
+    mut out = jar
+    for name in keys(incoming) {
+        out = insert(out, name, incoming[name])
+    }
+    out
+}
