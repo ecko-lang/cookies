@@ -1,13 +1,13 @@
-# cookies
+# Cookies - Ecko Std Lib Package
 
 Parse and serialize HTTP cookies for [Ecko](https://ecko.sh) client sessions:
 read `Set-Cookie` response headers into a jar, and build the `Cookie` request
-header to send them back. Written in Ecko; pure, no capabilities.
+header to send them back. Written in Ecko.
 
 ## Install
 
 ```bash
-ecko add https://github.com/ecko-sh/cookies
+ecko get github.com/ecko-sh/cookies
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ jar = cookies.set(jar, "k", "v") # add a cookie by hand
 | `parse(set_cookie)` | Parse one `Set-Cookie` header string (or a list of them) into a jar `{ name: record }` |
 | `header(jar)` | Build the `Cookie` request header, `"a=1; b=2"` (names sorted) |
 | `set(jar, name, value)` | Add or replace a cookie, returning a new jar |
-| `merge(jar, set_cookie)` | Fold a new `Set-Cookie` into a jar (later values win) — for session accumulation |
+| `merge(jar, set_cookie)` | Fold a new `Set-Cookie` into a jar (later values win) - for session accumulation |
 
 A record always carries `value`, plus any attributes present: `path`, `domain`,
 `expires`, `max_age` (Int), `same_site`, and the `secure` / `http_only` flags
@@ -41,7 +41,7 @@ A record always carries `value`, plus any attributes present: `path`, `domain`,
 
 - A cookie value may contain `=` (kept intact); a non-numeric `Max-Age` is
   ignored rather than fatal.
-- `header` sends only name=value pairs — attributes are response-only.
+- `header` sends only name=value pairs - attributes are response-only.
 
 ## Testing
 
@@ -51,4 +51,4 @@ ecko test tests/
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).

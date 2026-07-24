@@ -1,5 +1,5 @@
 {
-  "name": "cookies",
+  "module": "github.com/ecko-sh/cookies",
   "version": "0.1.0",
   "entrypoint": "main.ecko",
   "description": "Parse and serialize HTTP cookies for client sessions: read Set-Cookie headers into a jar, build the Cookie request header. Pure - no capabilities.",
