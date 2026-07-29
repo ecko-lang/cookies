@@ -41,7 +41,7 @@ fn parse_one(sc) {
     [name, cookie]
 }
 
-# parse(set_cookie) -> jar. Accepts one Set-Cookie header string or a list.
+## parse(set_cookie) -> jar. Accepts one Set-Cookie header string or a list.
 export fn parse(set_cookie) {
     headers = if type_of(set_cookie) == "list" { set_cookie } else { [set_cookie] }
     mut jar = empty_map()
@@ -52,8 +52,8 @@ export fn parse(set_cookie) {
     jar
 }
 
-# header(jar) -> "name=value; ..." for the Cookie request header (names sorted;
-# attributes are response-only and not sent).
+## header(jar) -> "name=value; ..." for the Cookie request header (names sorted;
+## attributes are response-only and not sent).
 export fn header(jar) {
     mut parts = []
     for name in sort(keys(jar)) {
@@ -62,15 +62,15 @@ export fn header(jar) {
     join(parts, "; ")
 }
 
-# set(jar, name, value) -> jar with a cookie added or replaced.
+## set(jar, name, value) -> jar with a cookie added or replaced.
 export fn set(jar, name, value) = insert(
     jar,
     name,
     { value: value, secure: false, http_only: false },
 )
 
-# merge(jar, set_cookie) -> jar with cookies from a new Set-Cookie folded in
-# (later values win) - the session-accumulation helper.
+## merge(jar, set_cookie) -> jar with cookies from a new Set-Cookie folded in
+## (later values win) - the session-accumulation helper.
 export fn merge(jar, set_cookie) {
     incoming = parse(set_cookie)
     mut out = jar
