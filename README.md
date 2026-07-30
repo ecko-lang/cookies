@@ -7,7 +7,7 @@ header to send them back. Written in Ecko.
 ## Install
 
 ```bash
-ecko get github.com/ecko-sh/cookies
+ecko get github.com/ecko-lang/cookies
 ```
 
 ## Usage
