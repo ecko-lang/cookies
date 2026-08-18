@@ -31,7 +31,19 @@ fn parse_one(sc) {
         kv = split(trim(parts[i]), "=")
         key = lower(trim(kv[0]))
         val = value_after_eq(kv)
-        if key == "secure" { cookie = insert(cookie, "secure", true) } else if key == "httponly" { cookie = insert(cookie, "http_only", true) } else if key == "path" { cookie = insert(cookie, "path", val) } else if key == "domain" { cookie = insert(cookie, "domain", val) } else if key == "expires" { cookie = insert(cookie, "expires", val) } else if key == "samesite" { cookie = insert(cookie, "same_site", val) } else if key == "max-age" {
+        if key == "secure" {
+            cookie = insert(cookie, "secure", true)
+        } else if key == "httponly" {
+            cookie = insert(cookie, "http_only", true)
+        } else if key == "path" {
+            cookie = insert(cookie, "path", val)
+        } else if key == "domain" {
+            cookie = insert(cookie, "domain", val)
+        } else if key == "expires" {
+            cookie = insert(cookie, "expires", val)
+        } else if key == "samesite" {
+            cookie = insert(cookie, "same_site", val)
+        } else if key == "max-age" {
             # Tolerant: a non-numeric Max-Age is ignored, not fatal.
             ma = try { int(val) } catch (e) { null }
             if ma != null { cookie = insert(cookie, "max_age", ma) }
