@@ -3,7 +3,7 @@ import "./main.ecko"
 cookies = main
 
 # A login response sets a session cookie.
-jar = cookies.parse("session=xyz789; Path=/; HttpOnly; Secure; Max-Age=86400")
+mut jar = cookies.parse("session=xyz789; Path=/; HttpOnly; Secure; Max-Age=86400")
 print(
     "stored session={jar.session.value} http_only={jar.session.http_only} max_age={jar.session.max_age}",
 )
