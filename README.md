@@ -15,13 +15,13 @@ ecko get github.com/ecko-lang/cookies
 ```ecko
 import cookies
 
-jar = cookies.parse("session=abc; Path=/; HttpOnly; Secure; Max-Age=3600")
+mut jar = cookies.parse("session=abc; Path=/; HttpOnly; Secure; Max-Age=3600")
 # { session: { value: "abc", path: "/", http_only: true, secure: true, max_age: 3600 } }
 
-cookies.header(jar)              # "session=abc"  - the Cookie request header
+cookies.header(jar)  # "session=abc"  - the Cookie request header
 
-jar = cookies.merge(jar, sc)     # fold a new Set-Cookie into the session jar
-jar = cookies.set(jar, "k", "v") # add a cookie by hand
+jar = cookies.merge(jar, sc)  # fold a new Set-Cookie into the session jar
+jar = cookies.set(jar, "k", "v")  # add a cookie by hand
 ```
 
 ## API
